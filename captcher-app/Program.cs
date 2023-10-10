@@ -23,6 +23,7 @@ List<UserData> data = UserData.Read(file);
 var velocidadeConstante = false;
 var constanciaDigitacao = false;
 var caracterEspecialImpossivel = false;
+var vetorReto = false;
 
 var velocidades = new List<int>();
 
@@ -85,7 +86,6 @@ for (int i = 0; i < data.Count; i++)
         teclas.Add(data[i].Text);
 }
 
-// var teclasAgrupadas = teclas.GroupBy(x => x);
 var max = 0;
 var repeated = 0;
 
@@ -103,9 +103,92 @@ foreach (var tecla in teclas.Distinct())
 if (repeated >= teclas.Count * 0.5)
     constanciaDigitacao = true;
 
+// Vetor
+var angulos = new List<float>();
+
+for (int i = 0; i < data.Count - 1; i++)
+{
+    if (
+        data[i].X != 0 
+        && data[i + 1].X != 0 
+        && data[i].Y != 0 
+        && data[i + 1].Y != 0
+    )
+    {
+        var quadrant = 0;
+        float angle = 0;
+
+        var deltaX = (data[i].X - data[i + 1].X);
+        var deltaY = (data[i].Y - data[i + 1].Y);
+
+        double arcTg = (Math.Atan(deltaX/deltaY) * (180 / Math.PI));
+
+        if (deltaX < 0 && deltaY < 0)
+            quadrant = 2;
+
+        if (deltaX > 0 && deltaY < 0)
+            quadrant = 1;
+
+        if (deltaX > 0 && deltaY > 0)
+            quadrant = 4;
+
+        if (deltaX < 0 && deltaY > 0)
+            quadrant = 3;
+
+        switch (quadrant)
+        {
+            case 1:
+                angle = (float)(270 + -(arcTg));
+                break;
+
+            case 2:
+                angle = (float)(270 - arcTg);
+                break;
+
+            case 3:
+                angle = (float)(90 + -(arcTg));
+                break;
+
+            default:
+                angle = (float)(90 - arcTg);
+                break;           
+        }
+
+        angulos.Add(angle);
+    }
+}
+
+var lists = new List<List<float>>();
+
+var sequencia = new List<float>();
+
+for (int i = 1; i < angulos.Count - 1; i++)
+{
+    if (angulos[i] == angulos[i + 1])
+    {
+        sequencia.Add(angulos[i]);
+    }
+    else 
+    {
+        sequencia.Add(angulos[i]);
+        lists.Add(sequencia);
+        sequencia.Clear();
+    }
+}
+
+var maxSize = 0;
+
+foreach (var lis in lists)
+{
+    if (lis.Count() > maxSize)
+        maxSize = lis.Count();
+}
+
+
+
 // deafult implementation example
 // defeat instaclick bot
-if (data.Count < 5 || velocidadeConstante || caracterEspecialImpossivel || constanciaDigitacao)
+if (data.Count < 80 || velocidadeConstante || caracterEspecialImpossivel || constanciaDigitacao || maxSize > 5)
     isCracker();
 else isUser();
 
